@@ -36,7 +36,7 @@
 
 Name:           regexp
 Version:        1.4
-Release:        %mkrel 3.0.1
+Release:        %mkrel 3.0.2
 Epoch:          0
 Summary:        Simple regular expressions API
 License:        Apache License
@@ -55,8 +55,6 @@ Buildroot:      %{_tmppath}/%{name}-%{version}-%{release}-root
 
 %if %{gcj_support}
 BuildRequires:          java-gcj-compat-devel
-Requires(post):         java-gcj-compat
-Requires(postun):       java-gcj-compat
 %endif
 
 %description

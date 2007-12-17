@@ -51,7 +51,6 @@ BuildRequires:  ant >= 1.6
 %if ! %{gcj_support}
 Buildarch:      noarch
 %endif
-Buildroot:      %{_tmppath}/%{name}-%{version}-%{release}-root
 
 %if %{gcj_support}
 BuildRequires:          java-gcj-compat-devel

@@ -28,15 +28,14 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-%define _with_gcj_support 1
-%define gcj_support %{?_with_gcj_support:1}%{!?_with_gcj_support:%{?_without_gcj_support:0}%{!?_without_gcj_support:%{?_gcj_support:%{_gcj_support}}%{!?_gcj_support:0}}}
+%define gcj_support 0
 
 %define full_name       jakarta-%{name}
 %define section         free
 
 Name:           regexp
-Version:        1.4
-Release:        %mkrel 3.0.3
+Version:        1.5
+Release:        %mkrel 0.0.1
 Epoch:          0
 Summary:        Simple regular expressions API
 License:        Apache License
@@ -77,8 +76,7 @@ Javadoc for %{name}.
 
 %prep
 %setup -q -n %{full_name}-%{version}
-# remove all binary libs
-find . -name "*.jar" -exec rm -f {} \;
+%remove_java_binaries
 
 %build
 mkdir lib
@@ -105,9 +103,7 @@ for i in `find $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version} -type f -name "*
   %{__perl} -pi -e 's/\r\n/\n/g' $i
 done
 
-%if %{gcj_support}
-%{_bindir}/aot-compile-rpm
-%endif
+%{gcj_compile}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -126,11 +122,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(0644,root,root,0755)
 %doc LICENSE
 %{_javadir}/*.jar
-
-%if %{gcj_support}
-%dir %{_libdir}/gcj/%{name}
-%attr(-,root,root) %{_libdir}/gcj/%{name}/*
-%endif
+%{gcj_files}
 
 %files javadoc
 %defattr(0644,root,root,0755)

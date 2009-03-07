@@ -35,7 +35,7 @@
 
 Name:           regexp
 Version:        1.5
-Release:        %mkrel 0.0.1
+Release:        %mkrel 0.0.2
 Epoch:          0
 Summary:        Simple regular expressions API
 License:        Apache License

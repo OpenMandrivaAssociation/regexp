@@ -86,27 +86,27 @@ export OPT_JAR_LIST=
 
 
 %install
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
 # jars
-install -d -m 755 $RPM_BUILD_ROOT%{_javadir}
-install -m 644 build/*.jar $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
-(cd $RPM_BUILD_ROOT%{_javadir} && for jar in *-%{version}*; do ln -sf ${jar} `echo $jar| sed  "s|-%{version}||g"`; done)
+install -d -m 755 %{buildroot}%{_javadir}
+install -m 644 build/*.jar %{buildroot}%{_javadir}/%{name}-%{version}.jar
+(cd %{buildroot}%{_javadir} && for jar in *-%{version}*; do ln -sf ${jar} `echo $jar| sed  "s|-%{version}||g"`; done)
 # javadoc
-install -d -m 755 $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-cp -r docs/api/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
+install -d -m 755 %{buildroot}%{_javadocdir}/%{name}-%{version}
+cp -r docs/api/* %{buildroot}%{_javadocdir}/%{name}-%{version}
 rm -rf docs/api
-%{__ln_s} %{name}-%{version} $RPM_BUILD_ROOT%{_javadocdir}/%{name}
+%{__ln_s} %{name}-%{version} %{buildroot}%{_javadocdir}/%{name}
 
 # fix end-of-line
-for i in `find $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version} -type f -name "*.html" -o -name "*.css"`; do
+for i in `find %{buildroot}%{_javadocdir}/%{name}-%{version} -type f -name "*.html" -o -name "*.css"`; do
   %{__perl} -pi -e 's/\r\n/\n/g' $i
 done
 
 %{gcj_compile}
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
 %if %{gcj_support}
 %post

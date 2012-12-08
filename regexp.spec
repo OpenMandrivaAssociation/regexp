@@ -35,7 +35,7 @@
 
 Name:           regexp
 Version:        1.5
-Release:        %mkrel 0.0.6
+Release:        %mkrel 0.0.8
 Epoch:          0
 Summary:        Simple regular expressions API
 License:        Apache License
@@ -86,27 +86,27 @@ export OPT_JAR_LIST=
 
 
 %install
-rm -rf %{buildroot}
+rm -rf $RPM_BUILD_ROOT
 
 # jars
-install -d -m 755 %{buildroot}%{_javadir}
-install -m 644 build/*.jar %{buildroot}%{_javadir}/%{name}-%{version}.jar
-(cd %{buildroot}%{_javadir} && for jar in *-%{version}*; do ln -sf ${jar} `echo $jar| sed  "s|-%{version}||g"`; done)
+install -d -m 755 $RPM_BUILD_ROOT%{_javadir}
+install -m 644 build/*.jar $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
+(cd $RPM_BUILD_ROOT%{_javadir} && for jar in *-%{version}*; do ln -sf ${jar} `echo $jar| sed  "s|-%{version}||g"`; done)
 # javadoc
-install -d -m 755 %{buildroot}%{_javadocdir}/%{name}-%{version}
-cp -r docs/api/* %{buildroot}%{_javadocdir}/%{name}-%{version}
+install -d -m 755 $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
+cp -r docs/api/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
 rm -rf docs/api
-%{__ln_s} %{name}-%{version} %{buildroot}%{_javadocdir}/%{name}
+%{__ln_s} %{name}-%{version} $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 
 # fix end-of-line
-for i in `find %{buildroot}%{_javadocdir}/%{name}-%{version} -type f -name "*.html" -o -name "*.css"`; do
+for i in `find $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version} -type f -name "*.html" -o -name "*.css"`; do
   %{__perl} -pi -e 's/\r\n/\n/g' $i
 done
 
 %{gcj_compile}
 
 %clean
-rm -rf %{buildroot}
+rm -rf $RPM_BUILD_ROOT
 
 %if %{gcj_support}
 %post
@@ -128,3 +128,69 @@ rm -rf %{buildroot}
 %defattr(0644,root,root,0755)
 %{_javadocdir}/%{name}-%{version}
 %dir %{_javadocdir}/%{name}
+
+
+%changelog
+* Thu May 05 2011 Oden Eriksson <oeriksson@mandriva.com> 0:1.5-0.0.6mdv2011.0
++ Revision: 669415
+- mass rebuild
+
+* Fri Dec 03 2010 Oden Eriksson <oeriksson@mandriva.com> 0:1.5-0.0.5mdv2011.0
++ Revision: 607353
+- rebuild
+
+* Wed Mar 17 2010 Oden Eriksson <oeriksson@mandriva.com> 0:1.5-0.0.4mdv2010.1
++ Revision: 523905
+- rebuilt for 2010.1
+
+* Thu Sep 03 2009 Christophe Fergeau <cfergeau@mandriva.com> 0:1.5-0.0.3mdv2010.0
++ Revision: 426904
+- rebuild
+
+* Sat Mar 07 2009 Antoine Ginies <aginies@mandriva.com> 0:1.5-0.0.2mdv2009.1
++ Revision: 351572
+- rebuild
+
+* Thu Aug 14 2008 Alexander Kurtakov <akurtakov@mandriva.org> 0:1.5-0.0.1mdv2009.0
++ Revision: 271808
+- new version 1.5
+
+  + Olivier Blin <oblin@mandriva.com>
+    - restore BuildRoot
+
+  + Thierry Vignaud <tv@mandriva.org>
+    - kill re-definition of %%buildroot on Pixel's request
+
+* Sun Dec 16 2007 Anssi Hannula <anssi@mandriva.org> 0:1.4-3.0.3mdv2008.1
++ Revision: 121016
+- buildrequire java-rpmbuild, i.e. build with icedtea on x86(_64)
+
+* Sat Sep 15 2007 Anssi Hannula <anssi@mandriva.org> 0:1.4-3.0.2mdv2008.0
++ Revision: 87349
+- rebuild to filter out autorequires of GCJ AOT objects
+- remove unnecessary Requires(post) on java-gcj-compat
+
+* Sun Aug 05 2007 David Walluck <walluck@mandriva.org> 0:1.4-3.0.1mdv2008.0
++ Revision: 59200
+- sync with JPackage
+
+
+* Wed Mar 14 2007 Christiaan Welvaart <cjw@daneel.dyndns.org>
++ 2007-03-14 17:48:02 (143747)
+- rebuild for 2007.1
+- Import regexp
+
+* Tue Jul 25 2006 David Walluck <walluck@mandriva.org> 0:1.4-1.2mdv2007.0
+- rebuild
+
+* Sun Jun 04 2006 David Walluck <walluck@mandriva.org> 0:1.4-1.1mdv2007.0
+- rebuild for libgcj.so.7
+- aot-compile
+
+* Sun May 08 2005 David Walluck <david@anti-microsoft.org> 0:1.3-2.1mdk
+- release
+
+* Thu Aug 26 2004 Fernando Nasser <fnasser@redhat.com> 0:1.3-2jpp
+- Require Ant > 1.6
+- Rebuild with Ant 1.6.2
+

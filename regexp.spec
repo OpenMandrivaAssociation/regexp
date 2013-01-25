@@ -1,60 +1,21 @@
-# Copyright (c) 2000-2005, JPackage Project
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-#
-# 1. Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-# 2. Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in the
-#    documentation and/or other materials provided with the
-#    distribution.
-# 3. Neither the name of the JPackage Project nor the names of its
-#    contributors may be used to endorse or promote products derived
-#    from this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-
-%define gcj_support 0
-
 %define full_name       jakarta-%{name}
-%define section         free
 
 Name:           regexp
 Version:        1.5
-Release:        %mkrel 0.0.8
+Release:        1
 Epoch:          0
 Summary:        Simple regular expressions API
 License:        Apache License
 Group:          Development/Java
 Url:            http://jakarta.apache.org/%{name}/
 Source0:        http://www.apache.org/dist/jakarta/regexp/jakarta-regexp-%{version}.tar.gz
+BuildRequires:	java-1.6.0-openjdk
 BuildRequires:  java-rpmbuild >= 0:1.6
 Requires(pre):     jpackage-utils >= 0:1.6
 Requires(postun):  jpackage-utils >= 0:1.6
 
 BuildRequires:  ant >= 1.6
-%if ! %{gcj_support}
 Buildarch:      noarch
-%endif
-Buildroot:      %{_tmppath}/%{name}-%{version}-%{release}-root
-
-%if %{gcj_support}
-BuildRequires:          java-gcj-compat-devel
-%endif
 
 %description
 Regexp is a 100% Pure Java Regular Expression package that was
@@ -82,7 +43,8 @@ Javadoc for %{name}.
 mkdir lib
 export CLASSPATH=
 export OPT_JAR_LIST=
-%{ant} -Djakarta-site2.dir=. jar javadocs
+export JAVA_HOME=%_prefix/lib/jvm/java-1.6.0
+ant -Djakarta-site2.dir=. jar javadocs
 
 
 %install
@@ -103,26 +65,10 @@ for i in `find $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version} -type f -name "*
   %{__perl} -pi -e 's/\r\n/\n/g' $i
 done
 
-%{gcj_compile}
-
-%clean
-rm -rf $RPM_BUILD_ROOT
-
-%if %{gcj_support}
-%post
-%{update_gcjdb}
-%endif
-
-%if %{gcj_support}
-%postun
-%{clean_gcjdb}
-%endif
-
 %files
 %defattr(0644,root,root,0755)
 %doc LICENSE
 %{_javadir}/*.jar
-%{gcj_files}
 
 %files javadoc
 %defattr(0644,root,root,0755)

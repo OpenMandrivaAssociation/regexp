@@ -2,14 +2,14 @@
 
 Name:           regexp
 Version:        1.5
-Release:        1
+Release:        2
 Epoch:          0
 Summary:        Simple regular expressions API
 License:        Apache License
 Group:          Development/Java
 Url:            http://jakarta.apache.org/%{name}/
 Source0:        http://www.apache.org/dist/jakarta/regexp/jakarta-regexp-%{version}.tar.gz
-BuildRequires:	java-1.6.0-openjdk
+BuildRequires:	java-1.6.0-openjdk-devel
 BuildRequires:  java-rpmbuild >= 0:1.6
 Requires(pre):     jpackage-utils >= 0:1.6
 Requires(postun):  jpackage-utils >= 0:1.6

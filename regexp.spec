@@ -2,7 +2,7 @@
 
 Name:           regexp
 Version:        1.5
-Release:        4
+Release:        5
 Epoch:          0
 Summary:        Simple regular expressions API
 License:        Apache License

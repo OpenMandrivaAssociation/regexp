@@ -1,21 +1,51 @@
-%define full_name       jakarta-%{name}
+%{?_javapackages_macros:%_javapackages_macros}
+# Copyright (c) 2000-2005, JPackage Project
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name of the JPackage Project nor the names of its
+#    contributors may be used to endorse or promote products derived
+#    from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+%global full_name       jakarta-%{name}
 
 Name:           regexp
 Version:        1.5
-Release:        3
+Release:        13.1%{?dist}
 Epoch:          0
 Summary:        Simple regular expressions API
-License:        Apache License
-Group:          Development/Java
+License:        ASL 2.0
+
 Url:            http://jakarta.apache.org/%{name}/
 Source0:        http://www.apache.org/dist/jakarta/regexp/jakarta-regexp-%{version}.tar.gz
-BuildRequires:	java-1.6.0-openjdk-devel
-BuildRequires:  java-rpmbuild >= 0:1.6
-Requires(pre):     jpackage-utils >= 0:1.6
-Requires(postun):  jpackage-utils >= 0:1.6
+Source1:        http://repo.maven.apache.org/maven2/%{full_name}/%{full_name}/1.4/%{full_name}-1.4.pom
+BuildRequires:  jpackage-utils >= 0:1.6
+Requires:       java
 
 BuildRequires:  ant >= 1.6
-Buildarch:      noarch
+BuildArch:      noarch
 
 %description
 Regexp is a 100% Pure Java Regular Expression package that was
@@ -26,117 +56,238 @@ It includes complete Javadoc documentation as well as a simple Applet
 for visual debugging and testing suite for compatibility.
 
 %package javadoc
-Group:          Development/Java
+
 Summary:        Javadoc for %{name}
-Requires(post): %{__rm}
-Requires(postun): %{__rm}
-Requires(post): /bin/ln
 
 %description javadoc
 Javadoc for %{name}.
 
 %prep
 %setup -q -n %{full_name}-%{version}
-%remove_java_binaries
+# remove all binary libs
+find . -name "*.jar" -exec rm -f {} \;
 
 %build
 mkdir lib
-export CLASSPATH=
-export OPT_JAR_LIST=
-export JAVA_HOME=%_prefix/lib/jvm/java-1.6.0
 ant -Djakarta-site2.dir=. jar javadocs
 
 
 %install
-rm -rf $RPM_BUILD_ROOT
-
 # jars
-install -d -m 755 $RPM_BUILD_ROOT%{_javadir}
-install -m 644 build/*.jar $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
-(cd $RPM_BUILD_ROOT%{_javadir} && for jar in *-%{version}*; do ln -sf ${jar} `echo $jar| sed  "s|-%{version}||g"`; done)
-# javadoc
-install -d -m 755 $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-cp -r docs/api/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-rm -rf docs/api
-%{__ln_s} %{name}-%{version} $RPM_BUILD_ROOT%{_javadocdir}/%{name}
+install -d -m 755 %{buildroot}%{_javadir}
+install -m 644 build/*.jar %{buildroot}%{_javadir}/%{name}.jar
 
-# fix end-of-line
-for i in `find $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version} -type f -name "*.html" -o -name "*.css"`; do
-  %{__perl} -pi -e 's/\r\n/\n/g' $i
-done
+# javadoc
+install -d -m 755 %{buildroot}%{_javadocdir}/%{name}-%{version}
+ln -s %{name}-%{version} %{buildroot}%{_javadocdir}/%{name}
+cp -r docs/api/* %{buildroot}%{_javadocdir}/%{name}-%{version}
+
+install -d -m 755 %{buildroot}%{_mavenpomdir}
+install -p -m 644 %{SOURCE1} %{buildroot}%{_mavenpomdir}/JPP-%{name}.pom
+%add_maven_depmap -a regexp:regexp
+
+%check
+ant -Djakarta-site2.dir=. test
 
 %files
-%defattr(0644,root,root,0755)
 %doc LICENSE
-%{_javadir}/*.jar
+%{_javadir}/%{name}.jar
+%{_mavenpomdir}/JPP-%{name}.pom
+%{_mavendepmapfragdir}/%{name}
 
 %files javadoc
-%defattr(0644,root,root,0755)
+%doc LICENSE
 %{_javadocdir}/%{name}-%{version}
-%dir %{_javadocdir}/%{name}
-
+%doc %{_javadocdir}/%{name}
 
 %changelog
-* Thu May 05 2011 Oden Eriksson <oeriksson@mandriva.com> 0:1.5-0.0.6mdv2011.0
-+ Revision: 669415
-- mass rebuild
+* Fri Jul 26 2013 Stanislav Ochotnicky <sochotnicky@redhat.com> - 0:1.5-13
+- Rebuild for #988462
 
-* Fri Dec 03 2010 Oden Eriksson <oeriksson@mandriva.com> 0:1.5-0.0.5mdv2011.0
-+ Revision: 607353
+* Tue Jul 23 2013 Stanislav Ochotnicky <sochotnicky@redhat.com> - 0:1.5-12
+- Enable testsuite
+
+* Fri Jun 28 2013 Mikolaj Izdebski <mizdebsk@redhat.com> - 0:1.5-11
+- Rebuild to regenerate API documentation
+- Resolves: CVE-2013-1571
+
+* Thu Feb 14 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:1.5-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
+
+* Wed Oct 31 2012 Mikolaj Izdebski <mizdebsk@redhat.com> - 0:1.5-9
+- Install LICENSE file with javadoc package
+- Add maven POM file
+- Update to current packaging guidelines
+- Convert versioned JAR to unversioned
+
+* Sat Jul 21 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:1.5-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
+* Sat Jan 14 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:1.5-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
+* Wed Feb 09 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:1.5-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
+
+* Wed Oct 6 2010 Alexander Kurtakov <akurtako@redhat.com> 0:1.5-5
+- Drop gcj support.
+
+* Fri Jan 08 2010 Andrew Overholt <overholt@redhat.com> 1.5-4.3
+- Remove javadoc ghost symlinking.
+
+* Sun Jul 26 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:1.5-4.2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
+
+* Wed Feb 25 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:1.5-3.2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
+
+* Thu Jul 10 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 0:1.5-2.2
+- drop repotag
+
+* Mon Feb 18 2008 Fedora Release Engineering <rel-eng@fedoraproject.org> - 0:1.5-2jpp.1
+- Autorebuild for GCC 4.3
+
+* Sat Feb 9 2008 Devrim GUNDUZ <devrim@commandprompt.com> 0:1.5-1jpp.1
+- Update to 1.5
+- Fix license
+- Cosmetic cleanup
+
+* Thu Feb 8 2007 Vivek Lakshmanan <vivekl at redhat.com> 0:1.4-3jpp.1.fc7
+- Resync with JPP
+- Use the upstream tar ball as JPP does since they clean it off jars anyway
+- Use JPackage exception compliant naming scheme
+- Remove section definition
+- Install unversioned symlink
+- Add missing ghost for unversioned link
+- Add requires on java
+
+* Fri Aug 4 2006 Vivek Lakshmanan <vivekl@redhat.com> 0:1.4-2jpp.2
+- Rebuild.
+
+* Fri Aug 4 2006 Vivek Lakshmanan <vivekl@redhat.com> 0:1.4-2jpp.1
+- Merge with latest from JPP.
+- Remove prebuilt jars from new source tar ball.
+
+* Sat Jul 22 2006 Jakub Jelinek <jakub@redhat.com> - 0:1.3-2jpp_9fc
+- Rebuilt
+
+* Wed Jul 12 2006 Jesse Keating <jkeating@redhat.com> - 0:1.3-2jpp_8fc
 - rebuild
 
-* Wed Mar 17 2010 Oden Eriksson <oeriksson@mandriva.com> 0:1.5-0.0.4mdv2010.1
-+ Revision: 523905
-- rebuilt for 2010.1
+* Mon Mar  6 2006 Jeremy Katz <katzj@redhat.com> - 0:1.3-2jpp_7fc
+- stop scriptlet spew
 
-* Thu Sep 03 2009 Christophe Fergeau <cfergeau@mandriva.com> 0:1.5-0.0.3mdv2010.0
-+ Revision: 426904
-- rebuild
+* Fri Feb 10 2006 Jesse Keating <jkeating@redhat.com> - 0:1.3-2jpp_6fc
+- bump again for double-long bug on ppc(64)
 
-* Sat Mar 07 2009 Antoine Ginies <aginies@mandriva.com> 0:1.5-0.0.2mdv2009.1
-+ Revision: 351572
-- rebuild
+* Tue Feb 07 2006 Jesse Keating <jkeating@redhat.com> - 0:1.3-2jpp_5fc
+- rebuilt for new gcc4.1 snapshot and glibc changes
 
-* Thu Aug 14 2008 Alexander Kurtakov <akurtakov@mandriva.org> 0:1.5-0.0.1mdv2009.0
-+ Revision: 271808
-- new version 1.5
+* Wed Dec 21 2005 Jesse Keating <jkeating@redhat.com> 0:1.2-2jpp_4fc
+- rebuilt again
 
-  + Olivier Blin <oblin@mandriva.com>
-    - restore BuildRoot
+* Tue Dec 13 2005 Jesse Keating <jkeating@redhat.com>
+- rebuilt for new gcj
 
-  + Thierry Vignaud <tv@mandriva.org>
-    - kill re-definition of %%buildroot on Pixel's request
+* Fri Dec 09 2005 Jesse Keating <jkeating@redhat.com>
+- rebuilt
 
-* Sun Dec 16 2007 Anssi Hannula <anssi@mandriva.org> 0:1.4-3.0.3mdv2008.1
-+ Revision: 121016
-- buildrequire java-rpmbuild, i.e. build with icedtea on x86(_64)
+* Fri Jul 15 2005 Gary Benson <gbenson@redhat.com> 0:1.3-2jpp_3fc
+- Build on ia64, ppc64, s390 and s390x.
+- Switch to aot-compile-rpm.
 
-* Sat Sep 15 2007 Anssi Hannula <anssi@mandriva.org> 0:1.4-3.0.2mdv2008.0
-+ Revision: 87349
-- rebuild to filter out autorequires of GCJ AOT objects
-- remove unnecessary Requires(post) on java-gcj-compat
+* Tue Jun 14 2005 Gary Benson <gbenson@redhat.com> 0:1.3-2jpp_2fc
+- Remove jarfile from the tarball.
 
-* Sun Aug 05 2007 David Walluck <walluck@mandriva.org> 0:1.4-3.0.1mdv2008.0
-+ Revision: 59200
-- sync with JPackage
+* Thu May 26 2005 Gary Benson <gbenson@redhat.com> 0:1.3-2jpp_1fc
+- Upgrade to 1.3-2jpp.
+- Rearrange how BC-compiled stuff is built and installed.
 
+* Mon May 23 2005 Gary Benson <gbenson@redhat.com> 0:1.3-1jpp_6fc
+- Add alpha to the list of build architectures (#157522).
+- Use absolute paths for rebuild-gcj-db.
 
-* Wed Mar 14 2007 Christiaan Welvaart <cjw@daneel.dyndns.org>
-+ 2007-03-14 17:48:02 (143747)
-- rebuild for 2007.1
-- Import regexp
+* Thu May  5 2005 Gary Benson <gbenson@redhat.com> 0:1.3-1jpp_5fc
+- BC-compile.
 
-* Tue Jul 25 2006 David Walluck <walluck@mandriva.org> 0:1.4-1.2mdv2007.0
-- rebuild
+* Tue Jan 11 2005 Gary Benson <gbenson@redhat.com> 0:1.3-1jpp_4fc
+- Sync with RHAPS.
 
-* Sun Jun 04 2006 David Walluck <walluck@mandriva.org> 0:1.4-1.1mdv2007.0
-- rebuild for libgcj.so.7
-- aot-compile
+* Thu Nov  4 2004 Gary Benson <gbenson@redhat.com> 0:1.3-1jpp_3fc
+- Build into Fedora.
 
-* Sun May 08 2005 David Walluck <david@anti-microsoft.org> 0:1.3-2.1mdk
-- release
+* Fri Oct  1 2004 Andrew Overholt <overholt@redhat.com> 0:1.3-1jpp_3rh
+- add coreutils BuildRequires
 
-* Thu Aug 26 2004 Fernando Nasser <fnasser@redhat.com> 0:1.3-2jpp
+* Wed Aug 25 2004 Fernando Nasser <fnasser@redhat.com> 0:1.3-2jpp
 - Require Ant > 1.6
 - Rebuild with Ant 1.6.2
 
+* Fri Mar 26 2004 Frank Ch. Eigler <fche@redhat.com> 0:1.3-1jpp_2rh
+- add RHUG upgrade cleanup
+
+* Thu Mar  3 2004 Frank Ch. Eigler <fche@redhat.com> 0:1.3-1jpp_1rh
+- RH vacuuming
+
+* Thu Oct 09 2003 Henri Gomez <hgomez at users.sourceforge.net> 0:1.3-1jpp
+- regexp 1.3
+
+* Fri May 09 2003 David Walluck <david@anti-microsoft.org> 0:1.2-14jpp
+- update for JPackage 1.5
+
+* Fri Mar 23 2003 Nicolas Mailhot <Nicolas.Mailhot (at) JPackage.org> 1.2-13jpp
+- for jpackage-utils 1.5
+
+* Tue Jul 02 2002 Guillaume Rousse <guillomovitch@users.sourceforge.net> 1.2-11jpp
+- section marcro
+- removed additional symlink
+
+* Mon Jun 24 2002 Henri Gomez <hgomez@slib.fr> 1.2-10jpp
+- add official jakarta jarname (jakarta-regexp-1.2.jar) symlink to real
+  jarname
+
+* Mon Jun 10 2002 Henri Gomez <hgomez@slib.fr> 1.2-9jpp
+- use sed instead of bash 2.x extension in link area to make spec compatible
+  with distro using bash 1.1x
+- use official tarball
+
+* Fri Jan 18 2002 Guillaume Rousse <guillomovitch@users.sourceforge.net> 1.2-8jpp 
+- versioned dir for javadoc
+- no dependencies javadoc package
+
+* Sat Dec 1 2001 Guillaume Rousse <guillomovitch@users.sourceforge.net> 1.2-7jpp
+- javadoc in javadoc package
+- official summary
+
+* Wed Nov 21 2001 Christian Zoffoli <czoffoli@littlepenguin.org> 1.2-5jpp
+- removed packager tag
+- new jpp extension
+
+* Sun Sep 30 2001 Guillaume Rousse <guillomovitch@users.sourceforge.net> 1.2-5jpp
+- first unified release
+- s/jPackage/JPackage
+
+* Sun Aug 26 2001 Guillaume Rousse <guillomovitch@users.sourceforge.net> 1.2-4mdk
+- vendor tag
+- packager tag
+- s/Copyright/License/
+- truncated description to 72 columns in spec
+- spec cleanup
+- used versioned jar
+- used new source packaging policy
+
+* Sat Feb 17 2001 Guillaume Rousse <g.rousse@linux-mandrake.com> 1.2-3mdk
+- spec cleanup
+- changelog correction
+
+* Sun Feb 04 2001 Guillaume Rousse <g.rousse@linux-mandrake.com> 1.2-2mdk
+- merged with Henri Gomez <hgomez@slib.fr> specs:
+- changed name to regexp
+-  changed javadir to /usr/share/java
+-  dropped jdk & jre requirement
+-  added Jikes support
+- changed jar name to regexp.jar
+- corrected doc
+
+* Sun Jan 14 2001 Guillaume Rousse <g.rousse@linux-mandrake.com> 1.2-1mdk
+- first Mandrake release

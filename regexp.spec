@@ -4,7 +4,7 @@
 
 Name:           regexp
 Version:        1.5
-Release:        18.2
+Release:        18.3
 Epoch:          0
 Summary:        Simple regular expressions API
 Group:          Development/Java

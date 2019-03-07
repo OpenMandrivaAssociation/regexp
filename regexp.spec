@@ -4,7 +4,7 @@
 
 Name:           regexp
 Version:        1.5
-Release:        19
+Release:        20
 Summary:        Simple regular expressions API
 Group:          Development/Java
 License:        ASL 2.0
@@ -14,6 +14,7 @@ Source0:        http://www.apache.org/dist/jakarta/regexp/jakarta-regexp-%{versi
 Source1:        http://repo.maven.apache.org/maven2/%{full_name}/%{full_name}/1.4/%{full_name}-1.4.pom
 BuildRequires:  jpackage-utils >= 0:1.6
 BuildRequires:  java-devel
+BuildRequires:	javapackages-local
 Requires:       java
 
 BuildRequires:  ant >= 1.6
@@ -53,10 +54,12 @@ install -m 644 build/*.jar %{buildroot}%{_javadir}/%{name}.jar
 install -d -m 755 %{buildroot}%{_javadocdir}/%{name}
 cp -pr docs/api/* %{buildroot}%{_javadocdir}/%{name}
 
+%add_maven_depmap jakarta-%{name}:jakarta-%{name}:%{version} -a %{name}:%{name} %{name}.jar
+
 %check
 ant -Djakarta-site2.dir=. test
 
-%files
+%files -f .mfiles
 %doc LICENSE
 %{_javadir}/%{name}.jar
 

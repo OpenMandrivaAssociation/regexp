@@ -4,7 +4,7 @@
 
 Name:           regexp
 Version:        1.5
-Release:        20
+Release:        21
 Summary:        Simple regular expressions API
 Group:          Development/Java
 License:        ASL 2.0

@@ -9,7 +9,7 @@ Summary:        Simple regular expressions API
 Group:          Development/Java
 License:        ASL 2.0
 
-Url:            http://jakarta.apache.org/%{name}/
+Url:            https://jakarta.apache.org/%{name}/
 Source0:        http://www.apache.org/dist/jakarta/regexp/jakarta-regexp-%{version}.tar.gz
 Source1:        http://repo.maven.apache.org/maven2/%{full_name}/%{full_name}/1.4/%{full_name}-1.4.pom
 BuildRequires:  jpackage-utils >= 0:1.6
